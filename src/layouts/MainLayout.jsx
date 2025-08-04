@@ -1,5 +1,12 @@
-const MainLayout = ({ children }) => {
-  return <div className="p-4">{children}</div>;
+import React from "react";
+import { Outlet } from "react-router-dom";
+
+const MainLayout = () => {
+  return (
+    <div className="p-4">
+      <Outlet />
+    </div>
+  );
 };
 
 export default MainLayout;

@@ -10,10 +10,21 @@ const Login = () => {
   const onSubmit = async data => {
     try {
       await login(data);
-      Swal.fire('Success!', 'Logged in successfully', 'success');
-      window.location.href = '/dashboard';
+      Swal.fire({
+        title: 'Success!',
+        text: 'Logged in successfully',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        window.location.href = '/dashboard';
+      });
     } catch {
-      Swal.fire('Error', 'Invalid login', 'error');
+      Swal.fire({
+        title: 'Error',
+        text: 'Invalid login',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
