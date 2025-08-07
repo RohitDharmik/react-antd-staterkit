@@ -13,12 +13,18 @@
     "preview:prod": "vite preview --mode production"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.0.0",
     "antd": "^5.13.0",
     "axios": "^1.6.8",
+    "framer-motion": "^12.23.12",
+    "gsap": "^3.13.0",
+    "lucide-react": "^0.536.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-hook-form": "^7.51.3",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^6.23.1",
+    "recharts": "^3.1.2",
     "sweetalert2": "^11.10.0",
     "zustand": "^4.5.2"
   },

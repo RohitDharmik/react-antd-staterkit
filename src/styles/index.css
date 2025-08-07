@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global dark gradient background and glassmorphism helpers */
+:root {
+  --bg-dark-start: #0f172a;
+  --bg-dark-mid: #1e293b;
+  --bg-dark-end: #0f172a;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  /* Tailwind base + custom layered gradients for subtle glow */
+  background:
+    radial-gradient(800px 400px at 80% 20%, rgba(59,130,246,0.18), transparent),
+    radial-gradient(600px 300px at 20% 80%, rgba(139,92,246,0.18), transparent),
+    linear-gradient(135deg, var(--bg-dark-start) 0%, var(--bg-dark-mid) 50%, var(--bg-dark-end) 100%);
+}
+
+/* Glass cards */
+.glass {
+  @apply bg-glass-dark backdrop-blur-lg shadow-glass rounded-2xl border border-slate-500/20;
+}
+
+.glass-accent {
+  @apply bg-glass-accent backdrop-blur-xl shadow-soft rounded-2xl border border-blue-500/30;
+}
+
+/* Neon ring focus */
+.neon-focus {
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.25), 0 0 20px rgba(59,130,246,0.35);
+}
+
+/* Soft scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148,163,184,0.4) transparent;
+}
+
+*::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(148,163,184,0.35);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(148,163,184,0.5);
+}
+
+/* Utility: card hover lift */
+.hover-lift {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(0,0,0,0.45);
+}
