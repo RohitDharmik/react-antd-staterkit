@@ -1,63 +1,108 @@
-import React, { Suspense, lazy } from "react";
-import MainLayout from "../layouts/MainLayout";
-import AuthLayout from "../layouts/AuthLayout";
-import Home from "../pages/Home/Home";
-import Dashboard from "../pages/Dashboard/Dashboard";
-import Login from "../pages/Login/Login";
-import PrivateRoute from "../components/templates/PrivateRoute";
+import React from 'react';
+import { createBrowserRouter } from 'react-router-dom';
 
-// Lazy-loaded feature pages
-const DeviceSync = lazy(() => import("../pages/DeviceSync/DeviceSync"));
-const SmartHome = lazy(() => import("../pages/SmartHome/SmartHome"));
-const AIConsole = lazy(() => import("../pages/AIConsole/AIConsole"));
-const Profiles = lazy(() => import("../pages/Profiles/Profiles"));
-const Briefing = lazy(() => import("../pages/Briefing/Briefing"));
-const Automations = lazy(() => import("../pages/Automations/Automations"));
-const Security = lazy(() => import("../pages/Security/Security"));
-const Settings = lazy(() => import("../pages/Settings/Settings"));
-const Analytics = lazy(() => import("../pages/Analytics/Analytics"));
-const Labs = lazy(() => import("../pages/Labs/Labs"));
+import MainLayout from '../layouts/MainLayout';
+import AuthLayout from '../layouts/AuthLayout';
+import PrivateRoute from '../components/templates/PrivateRoute';
 
-const withSuspense = (node) => (
-  <Suspense fallback={<div className="p-6 text-slate-400">Loading...</div>}>{node}</Suspense>
-);
+import Home from '../pages/Home/Home';
+import Dashboard from '../pages/Dashboard/Dashboard';
+import AIConsole from '../pages/AIConsole/AIConsole';
+import Briefing from '../pages/Briefing/Briefing';
+import Analytics from '../pages/Analytics/Analytics';
+import Settings from '../pages/Settings/Settings';
+import Profiles from '../pages/Profiles/Profiles';
+import Security from '../pages/Security/Security';
+import SmartHome from '../pages/SmartHome/SmartHome';
+import Automations from '../pages/Automations/Automations';
+import DeviceSync from '../pages/DeviceSync/DeviceSync';
+import Labs from '../pages/Labs/Labs';
+import Login from '../pages/Login/Login';
 
-export const routes = [
+// Public pages
+import LandingPage from '../pages/Public/LandingPage';
+import About from '../pages/Public/About';
+import Features from '../pages/Public/Features';
+import Docs from '../pages/Public/Docs';
+import Contact from '../pages/Public/Contact';
+import PublicLayout from '../layouts/PublicLayout';
+
+const router = createBrowserRouter([
+  // Public routes wrapped with common PublicLayout
   {
-    path: "/",
-    element: <MainLayout />,
-    children: [
-      { index: true, element: <Home /> },
-      {
-        path: "dashboard",
-        element: (
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        ),
-      },
-      { path: "device-sync", element: withSuspense(<PrivateRoute><DeviceSync /></PrivateRoute>) },
-      { path: "smart-home", element: withSuspense(<PrivateRoute><SmartHome /></PrivateRoute>) },
-      { path: "ai-console", element: withSuspense(<PrivateRoute><AIConsole /></PrivateRoute>) },
-      { path: "profiles", element: withSuspense(<PrivateRoute><Profiles /></PrivateRoute>) },
-      { path: "briefing", element: withSuspense(<PrivateRoute><Briefing /></PrivateRoute>) },
-      { path: "automations", element: withSuspense(<PrivateRoute><Automations /></PrivateRoute>) },
-      { path: "security", element: withSuspense(<PrivateRoute><Security /></PrivateRoute>) },
-      { path: "settings", element: withSuspense(<PrivateRoute><Settings /></PrivateRoute>) },
-      { path: "analytics", element: withSuspense(<PrivateRoute><Analytics /></PrivateRoute>) },
-      { path: "labs", element: withSuspense(<PrivateRoute><Labs /></PrivateRoute>) },
-    ],
+    path: '/',
+    element: (
+      <PublicLayout>
+        <LandingPage />
+      </PublicLayout>
+    ),
   },
   {
-    path: "/board",
-    element: <Dashboard />,
+    path: '/about',
+    element: (
+      <PublicLayout>
+        <About />
+      </PublicLayout>
+    ),
   },
   {
-    path: "/login",
+    path: '/features',
+    element: (
+      <PublicLayout>
+        <Features />
+      </PublicLayout>
+    ),
+  },
+  {
+    path: '/docs',
+    element: (
+      <PublicLayout>
+        <Docs />
+      </PublicLayout>
+    ),
+  },
+  {
+    path: '/contact',
+    element: (
+      <PublicLayout>
+        <Contact />
+      </PublicLayout>
+    ),
+  },
+
+  // Auth route (public, themed but kept simple)
+  {
+    path: '/login',
     element: (
       <AuthLayout>
         <Login />
       </AuthLayout>
     ),
   },
-];
+  // Private app routes remain under MainLayout + PrivateRoute
+  {
+    path: '/',
+    element: (
+      <PrivateRoute>
+        <MainLayout />
+      </PrivateRoute>
+    ),
+    children: [
+      // {  path: 'dashboard',index: true, element: <Home /> },
+      { path: 'dashboard', element: <Dashboard /> },
+      { path: 'console', element: <AIConsole /> },
+      { path: 'briefing', element: <Briefing /> },
+      { path: 'analytics', element: <Analytics /> },
+      { path: 'settings', element: <Settings /> },
+      { path: 'profiles', element: <Profiles /> },
+      { path: 'security', element: <Security /> },
+      { path: 'smarthome', element: <SmartHome /> },
+      { path: 'automations', element: <Automations /> },
+      { path: 'devices', element: <DeviceSync /> },
+      { path: 'labs', element: <Labs /> },
+    ],
+  },
+]);
+
+export { router };
+

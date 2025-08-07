@@ -1,16 +1,15 @@
-import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { routes } from './config/routes';
-
-const AppRoutes = () => useRoutes(routes);
+import { PersonalizationProvider } from './context/PersonalizationContext';
+import { router } from './config/routes';
 
 const App = () => {
   return (
-    <Router>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </Router>
+    <AuthProvider>
+      <PersonalizationProvider>
+        <RouterProvider router={router} />
+      </PersonalizationProvider>
+    </AuthProvider>
   );
 };
 

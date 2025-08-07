@@ -7,6 +7,20 @@
   --bg-dark-start: #0f172a;
   --bg-dark-mid: #1e293b;
   --bg-dark-end: #0f172a;
+  --accent: #3b82f6;
+}
+
+/* Theme variants via data attribute on html element (set by PersonalizationProvider) */
+:root[data-app-theme="glass-contrast"] {
+  --bg-dark-start: #0b1220;
+  --bg-dark-mid: #0f172a;
+  --bg-dark-end: #0b1220;
+}
+
+:root[data-app-theme="neon"] {
+  --bg-dark-start: #0a0f1f;
+  --bg-dark-mid: #101a35;
+  --bg-dark-end: #0a0f1f;
 }
 
 html, body, #root {
@@ -16,23 +30,27 @@ html, body, #root {
 body {
   /* Tailwind base + custom layered gradients for subtle glow */
   background:
-    radial-gradient(800px 400px at 80% 20%, rgba(59,130,246,0.18), transparent),
-    radial-gradient(600px 300px at 20% 80%, rgba(139,92,246,0.18), transparent),
+    radial-gradient(800px 400px at 80% 20%, color-mix(in oklab, var(--accent, #3b82f6) 35%, transparent), transparent),
+    radial-gradient(600px 300px at 20% 80%, color-mix(in oklab, var(--accent, #8b5cf6) 35%, transparent), transparent),
     linear-gradient(135deg, var(--bg-dark-start) 0%, var(--bg-dark-mid) 50%, var(--bg-dark-end) 100%);
 }
 
 /* Glass cards */
 .glass {
-  @apply bg-glass-dark backdrop-blur-lg shadow-glass rounded-2xl border border-slate-500/20;
+  @apply backdrop-blur-lg shadow-glass rounded-2xl border border-slate-500/20;
+  background-image: theme('backgroundImage.glass-dark');
 }
 
 .glass-accent {
-  @apply bg-glass-accent backdrop-blur-xl shadow-soft rounded-2xl border border-blue-500/30;
+  @apply backdrop-blur-xl shadow-soft rounded-2xl border;
+  border-color: color-mix(in oklab, var(--accent, #3b82f6) 40%, transparent);
+  background-image: theme('backgroundImage.glass-accent');
 }
 
 /* Neon ring focus */
 .neon-focus {
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.25), 0 0 20px rgba(59,130,246,0.35);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent, #3b82f6) 25%, transparent),
+              0 0 20px color-mix(in oklab, var(--accent, #3b82f6) 35%, transparent);
 }
 
 /* Soft scrollbars */
