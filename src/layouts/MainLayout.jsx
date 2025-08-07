@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import { BellOutlined, LogoutOutlined, CheckCircleOutlined, ClearOutlined } from "@ant-design/icons";
 import { Cpu, Bot, Home, Settings, Shield, Sparkles, SlidersHorizontal, BarChart3, FlaskConical, RefreshCw } from "lucide-react";
 import useAuth from "../hooks/useAuth";
-import { Badge, Dropdown, Empty } from "antd";
+import { Badge, Dropdown, Empty, ConfigProvider, theme as antdTheme } from "antd";
+import { usePersonalization } from "../context/PersonalizationContext";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: <Cpu size={18} /> },
@@ -23,6 +24,7 @@ const navItems = [
 const MainLayout = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { accent } = usePersonalization();
   const [notifOpen, setNotifOpen] = useState(false);
 
   const [notifications, setNotifications] = useState([
@@ -90,7 +92,27 @@ const MainLayout = () => {
     }
   };
 
+  const antdConfig = useMemo(() => ({
+    algorithm: antdTheme.darkAlgorithm,
+    token: {
+      colorPrimary: accent,
+      colorLink: accent,
+      colorInfo: accent,
+      colorBgContainer: 'transparent',
+      colorBgElevated: 'transparent',
+      borderRadius: 16,
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    },
+    components: {
+      Card: { headerBg: 'transparent', bodyBg: 'transparent' },
+      Layout: { bodyBg: 'transparent', headerBg: 'transparent', siderBg: 'transparent' },
+      Button: { borderRadius: 12 },
+      Tag: {},
+    }
+  }), [accent]);
+
   return (
+    <ConfigProvider theme={antdConfig}>
       <div className="min-h-screen bg-[radial-gradient(1200px_800px_at_10%_-10%,rgba(59,130,246,0.12),transparent),radial-gradient(1200px_800px_at_90%_110%,rgba(99,102,241,0.12),transparent)] text-slate-200">
         <div className="flex">
           {/* Sidebar */}
@@ -186,8 +208,8 @@ const MainLayout = () => {
           </main>
         </div>
       </div>
+    </ConfigProvider>
   );
 };
 
 export default MainLayout;
-
