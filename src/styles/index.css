@@ -2,25 +2,125 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Glassmorphism utility helpers and badges */
+
+:root[data-app-theme='glass-dark'] {
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  --accent: #00e5ff;
+}
+
+:root[data-app-theme='neon'] {
+  --glass-bg: rgba(0, 229, 255, 0.06);
+  --glass-border: rgba(0, 229, 255, 0.22);
+  --glass-shadow: 0 10px 30px rgba(0, 229, 255, 0.12);
+  --accent: #00e5ff;
+}
+
+:root[data-app-theme='glass-contrast'] {
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --accent: #7c3aed;
+}
+
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--glass-shadow);
+  border-radius: 14px;
+}
+
+.glass-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-accent {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--glass-shadow);
+  border-radius: 16px;
+}
+
+.btn-glow {
+  @apply inline-flex items-center px-6 py-3 rounded-lg text-cyan-200 transition;
+  background: color-mix(in oklab, var(--accent) 15%, transparent);
+  border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+  box-shadow: 0 0 24px color-mix(in oklab, var(--accent) 20%, transparent);
+}
+.btn-glow:hover {
+  box-shadow: 0 0 36px color-mix(in oklab, var(--accent) 35%, transparent);
+  transform: translateY(-1px);
+}
+
+.hover-lift {
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  border-color: color-mix(in oklab, var(--accent) 35%, transparent);
+}
+
+.ambient-audio-badge {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 40;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  color: var(--text-on-accent, #c0f7ff);
+  background: color-mix(in oklab, var(--accent, #00e5ff) 12%, rgba(0,0,0,0.4));
+  border: 1px solid color-mix(in oklab, var(--accent, #00e5ff) 35%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 18px color-mix(in oklab, var(--accent, #00e5ff) 25%, transparent);
+}
+
+.hero-cta {
+  @apply inline-flex items-center px-6 py-3 rounded-lg transition;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift, .btn-glow { transition: none !important; }
+}
+
 /* Global dark gradient background and glassmorphism helpers */
 :root {
   --bg-dark-start: #0f172a;
   --bg-dark-mid: #1e293b;
   --bg-dark-end: #0f172a;
   --accent: #3b82f6;
+  --accent-contrast: #0b1220;
+  --text-on-accent: #e6f6ff;
+  --surface: rgba(255,255,255,0.06);
+  --surface-contrast: rgba(255,255,255,0.12);
 }
-
+ 
 /* Theme variants via data attribute on html element (set by PersonalizationProvider) */
 :root[data-app-theme="glass-contrast"] {
   --bg-dark-start: #0b1220;
   --bg-dark-mid: #0f172a;
   --bg-dark-end: #0b1220;
+  --accent: #7c3aed;
+  --accent-contrast: #0b1220;
+  --text-on-accent: #f2e7ff;
 }
-
+ 
 :root[data-app-theme="neon"] {
   --bg-dark-start: #0a0f1f;
   --bg-dark-mid: #101a35;
   --bg-dark-end: #0a0f1f;
+  --accent: #00e5ff;
+  --accent-contrast: #051018;
+  --text-on-accent: #cff9ff;
 }
 
 html, body, #root {
@@ -33,12 +133,64 @@ body {
     radial-gradient(800px 400px at 80% 20%, color-mix(in oklab, var(--accent, #3b82f6) 35%, transparent), transparent),
     radial-gradient(600px 300px at 20% 80%, color-mix(in oklab, var(--accent, #8b5cf6) 35%, transparent), transparent),
     linear-gradient(135deg, var(--bg-dark-start) 0%, var(--bg-dark-mid) 50%, var(--bg-dark-end) 100%);
+  color: #e2e8f0;
+}
+
+/* Consistent container utilities */
+.container-page {
+  @apply px-4 md:px-6 py-4 md:py-6 max-w-7xl mx-auto;
+}
+.container-narrow {
+  @apply px-4 md:px-6 py-4 md:py-6 max-w-5xl mx-auto;
+}
+.container-wide {
+  @apply px-4 md:px-6 py-4 md:py-6 max-w-[95rem] mx-auto;
+}
+
+/* Typography scale */
+.h1 {
+  @apply text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight;
+}
+.h2 {
+  @apply text-2xl sm:text-3xl font-semibold;
+}
+.h3 {
+  @apply text-xl sm:text-2xl font-semibold;
+}
+.p {
+  @apply text-slate-300/90 text-sm sm:text-base;
 }
 
 /* Glass cards */
 .glass {
   @apply backdrop-blur-lg shadow-glass rounded-2xl border border-slate-500/20;
   background-image: theme('backgroundImage.glass-dark');
+}
+
+/* Utility: subtle glass panel with neon edge */
+.glass-panel {
+  @apply rounded-2xl border backdrop-blur-md;
+  border-color: color-mix(in oklab, var(--accent, #3b82f6) 22%, rgba(255,255,255,0.08));
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  box-shadow: 0 10px 30px -12px rgba(0,0,0,0.6), 0 0 18px rgba(59,130,246,0.12);
+}
+
+/* Utility: glowing button base */
+.btn-glow {
+  @apply inline-flex items-center px-6 py-3 rounded-lg border transition font-medium;
+  border-color: color-mix(in oklab, var(--accent, #3b82f6) 45%, rgba(255,255,255,0.12));
+  background: color-mix(in oklab, var(--accent, #3b82f6) 22%, rgba(0,0,0,0.05));
+  color: var(--text-on-accent, #e2e8f0);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+  box-shadow: 0 0 20px color-mix(in oklab, var(--accent, #3b82f6) 30%, transparent);
+}
+.btn-glow:hover {
+  background: color-mix(in oklab, var(--accent, #3b82f6) 28%, rgba(0,0,0,0.06));
+  box-shadow: 0 0 26px color-mix(in oklab, var(--accent, #3b82f6) 40%, transparent);
+}
+.btn-glow:focus-visible {
+  @apply outline-none;
+  box-shadow: 0 0 0 2px var(--accent-contrast), 0 0 0 4px color-mix(in oklab, var(--accent, #3b82f6) 45%, transparent);
 }
 
 .glass-accent {
@@ -53,10 +205,104 @@ body {
               0 0 20px color-mix(in oklab, var(--accent, #3b82f6) 35%, transparent);
 }
 
-/* Soft scrollbars */
+/* Ant Design: solid modal/drawer/dropdown backgrounds for dark glass theme */
+:root {
+  --panel-bg: rgba(15,23,42,0.92);
+  --panel-border: rgba(148,163,184,0.18);
+  --panel-shadow: 0 30px 80px -20px rgba(0,0,0,0.65);
+}
+
+/* Modal */
+.ant-modal-root .ant-modal-mask {
+  background: rgba(2, 6, 23, 0.72) !important;
+  backdrop-filter: blur(4px);
+}
+.ant-modal-root .ant-modal {
+  padding: 0 !important;
+}
+.ant-modal-root .ant-modal-content {
+  background: var(--panel-bg) !important;
+  border: 1px solid var(--panel-border) !important;
+  box-shadow: var(--panel-shadow) !important;
+  border-radius: 16px !important;
+}
+.ant-modal-root .ant-modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(148,163,184,0.12) !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+.ant-modal-root .ant-modal-title {
+  color: #e2e8f0 !important;
+}
+.ant-modal-root .ant-modal-close {
+  color: #94a3b8 !important;
+}
+
+/* Drawer */
+.ant-drawer .ant-drawer-mask {
+  background: rgba(2, 6, 23, 0.72) !important;
+  backdrop-filter: blur(4px);
+}
+.ant-drawer .ant-drawer-content {
+  background: var(--panel-bg) !important;
+  border-left: 1px solid var(--panel-border) !important;
+  box-shadow: var(--panel-shadow) !important;
+}
+
+/* Dropdown/Popups (Menus, Select dropdown, Tooltip inner) */
+.ant-dropdown .ant-dropdown-menu,
+.ant-select-dropdown,
+.ant-picker-dropdown .ant-picker-panel-container,
+.ant-tooltip .ant-tooltip-inner,
+.ant-popover .ant-popover-inner {
+  background: var(--panel-bg) !important;
+  border: 1px solid var(--panel-border) !important;
+  box-shadow: var(--panel-shadow) !important;
+  backdrop-filter: blur(6px);
+}
+
+.ant-dropdown .ant-dropdown-menu-item,
+.ant-dropdown .ant-dropdown-menu-submenu-title,
+.ant-select-item {
+  color: #e2e8f0 !important;
+}
+.ant-dropdown .ant-dropdown-menu-item:hover,
+.ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background: rgba(59,130,246,0.12) !important;
+}
+
+/* Fix backdrop-blur stacking with our mouse light overlay */
+.ant-dropdown,
+.ant-modal,
+.ant-drawer,
+.ant-picker-dropdown,
+.ant-select-dropdown,
+.ant-tooltip,
+.ant-popover {
+  position: relative;
+  z-index: 10000; /* above mouse-light-overlay(9999) */
+}
+
+/* Ambient audio badge (hidden by default, for future toggle) */
+.ambient-audio-badge {
+  @apply fixed bottom-4 right-4 z-40 px-3 py-1.5 rounded-md text-xs border;
+  background: color-mix(in oklab, var(--accent, #3b82f6) 10%, rgba(15,23,42,0.6));
+  border-color: color-mix(in oklab, var(--accent, #3b82f6) 35%, rgba(255,255,255,0.12));
+  color: var(--text-on-accent, rgba(226,232,240,0.9));
+  backdrop-filter: blur(8px);
+}
+
+/* Soft scrollbars and focus-visible */
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(148,163,184,0.4) transparent;
+  outline: none;
+}
+:focus-visible {
+  outline: 0 !important;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent, #3b82f6) 45%, transparent),
+              0 0 0 4px color-mix(in oklab, var(--accent, #3b82f6) 20%, transparent);
+  border-radius: 0.5rem;
 }
 
 *::-webkit-scrollbar {
@@ -73,9 +319,58 @@ body {
 
 /* Utility: card hover lift */
 .hover-lift {
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
 }
 .hover-lift:hover {
   transform: translateY(-4px);
   box-shadow: 0 20px 40px -12px rgba(0,0,0,0.45);
+  border-color: color-mix(in oklab, var(--accent, #3b82f6) 35%, rgba(255,255,255,0.08));
+}
+
+/* Mouse light overlay */
+.mouse-light-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 32vmax;
+  height: 32vmax;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 50;
+  mix-blend-mode: screen;
+  opacity: 0;
+  background: radial-gradient(
+    circle at center,
+    color-mix(in oklab, var(--accent, #3b82f6) 45%, transparent) 0%,
+    color-mix(in oklab, var(--accent, #3b82f6) 28%, transparent) 18%,
+    rgba(59, 130, 246, 0.14) 32%,
+    rgba(59, 130, 246, 0.08) 46%,
+    transparent 70%
+  );
+  filter: blur(18px);
+}
+
+/* Prefer reduced motion: keep static, no transitions */
+@media (prefers-reduced-motion: reduce) {
+  .mouse-light-overlay {
+    display: none !important;
+  }
+}
+
+/* Touch devices: disable overlay to avoid distraction */
+@media (hover: none) and (pointer: coarse) {
+  .mouse-light-overlay {
+    display: none !important;
+  }
+}
+
+/* Reduced motion hardening */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

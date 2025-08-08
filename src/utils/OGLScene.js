@@ -2,8 +2,14 @@
 // OGLScene.js
 // Creates a neural-wave mesh with floating particles using OGL
 // Mounts to a passed canvas element and provides start/stop/dispose APIs.
+// Now respects prefers-reduced-motion and avoids forced audio or heavy motion.
 
-import { Renderer, Camera, Transform, Program, Mesh, Vec2, Vec3, Color, Geometry, Texture, Triangle } from 'ogl';
+import { Renderer, Camera, Transform, Program, Mesh, Vec2, Color, Geometry } from 'ogl';
+import { gsap } from 'gsap';
+
+const prefersReduced = typeof window !== 'undefined'
+  ? window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true
+  : false;
 
 const vertex = `
 attribute vec3 position;
@@ -14,6 +20,8 @@ uniform mat4 projectionMatrix;
 uniform float uTime;
 uniform vec2 uMouse;
 uniform float uAspect;
+uniform float uAudioAmp;
+uniform float uScrollPhase;
 
 varying vec2 vUv;
 varying float vElevation;
@@ -37,15 +45,24 @@ void main() {
   vUv = uv;
   vec3 pos = position;
 
-  // wave elevation using time + fbm
-  float t = uTime * 0.2;
-  float e = fbm(uv * 3.0 + t) * 0.6;
-  // Mouse parallax displacement
-  float parallax = (uMouse.x * (uv.x - 0.5) + uMouse.y * (uv.y - 0.5)) * 0.6;
+  float t = uTime * 0.25;
+  // Wave frequency and amplitude modulated by scroll phase (0..1)
+  float freq = mix(2.5, 4.5, uScrollPhase);
+  float amp = mix(0.45, 0.9, uScrollPhase);
 
-  pos.z += e * 1.2 + parallax;
+  float e = fbm(uv * freq + t) * amp;
 
-  vElevation = e;
+  // Mouse parallax (reduced intensity if prefers-reduced-motion)
+  float parallaxScale = ${'${'}prefersReduced ? '0.2' : '0.6'${'}'};
+  float parallax = (uMouse.x * (uv.x - 0.5) + uMouse.y * (uv.y - 0.5)) * parallaxScale;
+
+  // Audio reactive radial pulse centered, scaled by uAudioAmp (disabled if reduced)
+  float d = distance(uv, vec2(0.5));
+  float pulse = smoothstep(0.35, 0.0, d) * uAudioAmp * ${'${'}prefersReduced ? '0.0' : '1.0'${'}'};
+
+  pos.z += e * 1.2 + parallax + pulse;
+
+  vElevation = e + pulse * 0.5;
 
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
@@ -58,30 +75,29 @@ uniform float uTime;
 uniform vec2 uResolution;
 uniform vec3 uColorA;
 uniform vec3 uColorB;
+uniform float uScrollPhase;
 
 varying vec2 vUv;
 varying float vElevation;
 
 void main() {
-  // neon gradient blend
   float glow = smoothstep(0.0, 1.0, vElevation);
-  vec3 base = mix(uColorA, uColorB, vUv.y + glow * 0.2);
+  // blend colors also by scroll phase for a cinematic shift
+  vec3 base = mix(uColorA, uColorB, vUv.y + glow * 0.25 + uScrollPhase * 0.15);
 
-  // subtle scanline effect
-  float scan = sin((vUv.y + uTime * 0.2) * 50.0) * 0.04;
+  // scanlines (disabled when reduced motion preference is set by lowering amplitude)
+  float scan = sin((vUv.y + uTime * 0.2) * 50.0) * ${'${'}prefersReduced ? '0.0' : '0.05'${'}'};
   base += scan;
 
-  // vignette
   vec2 c = vUv - 0.5;
   float vig = 1.0 - dot(c, c) * 1.2;
   base *= vig;
 
-  gl_FragColor = vec4(base, 0.9); // alpha < 1.0 to allow glassmorphism overlay
+  gl_FragColor = vec4(base, 0.9);
 }
 `;
 
 function createPlane({ width = 2, height = 2, widthSegments = 80, heightSegments = 80 } = {}) {
-  // Plane geometry in OGL
   const geometry = new Geometry();
   const num = (widthSegments + 1) * (heightSegments + 1);
   const position = new Float32Array(num * 3);
@@ -139,10 +155,53 @@ export class OGLScene {
     this.mouse = { x: 0, y: 0 };
     this.disposed = false;
 
+    // audio reactive fields
+    this.micEnabled = false;
+    this.audioAmp = 0;
+    this.audioCtx = null;
+    this.analyser = null;
+    this.source = null;
+    this.micStream = null;
+    this.freqData = null;
+
+    // gsap-driven uniform for page scroll/intro
+    this.scrollPhase = { value: 0 }; // proxy object for gsap tweening
+
     this.onResize = this.onResize.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
+    this.onMicToggle = this.onMicToggle.bind(this);
 
     if (canvas) this.init();
+  }
+
+  async onMicToggle(e) {
+    const enabled = !!e.detail?.enabled;
+    this.micEnabled = enabled && !prefersReduced;
+
+    if (this.micEnabled) {
+      try {
+        if (!this.audioCtx) {
+          this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        this.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.source = this.audioCtx.createMediaStreamSource(this.micStream);
+        this.analyser = this.audioCtx.createAnalyser();
+        this.analyser.fftSize = 256;
+        this.freqData = new Uint8Array(this.analyser.frequencyBinCount);
+        this.source.connect(this.analyser);
+      } catch (err) {
+        console.warn('Mic init failed in OGLScene', err);
+        this.micEnabled = false;
+      }
+    } else {
+      try { this.source?.disconnect(); } catch {}
+      try { this.micStream?.getTracks()?.forEach((t) => t.stop()); } catch {}
+      this.source = null;
+      this.analyser = null;
+      this.micStream = null;
+      this.freqData = null;
+      this.audioAmp = 0;
+    }
   }
 
   init() {
@@ -167,6 +226,8 @@ export class OGLScene {
         uAspect: { value: 1 },
         uColorA: { value: new Color(this.options.colorA || '#00E5FF') },
         uColorB: { value: new Color(this.options.colorB || '#8A2BE2') },
+        uAudioAmp: { value: 0 },
+        uScrollPhase: { value: 0 },
       },
       transparent: true,
       cullFace: null,
@@ -183,8 +244,18 @@ export class OGLScene {
 
     window.addEventListener('resize', this.onResize);
     window.addEventListener('pointermove', this.onPointerMove);
+    window.addEventListener('ncc:mic-enabled', this.onMicToggle);
 
     this.onResize();
+
+    // GSAP intro timeline for cinematic background ramp-in (reduced duration if prefers-reduced-motion)
+    try {
+      gsap.fromTo(
+        this.scrollPhase,
+        { value: 0 },
+        { value: 1, duration: prefersReduced ? 0 : 2.0, ease: 'power2.out' }
+      );
+    } catch {}
   }
 
   onPointerMove(e) {
@@ -193,7 +264,6 @@ export class OGLScene {
     if (!rect || !rect.width || !rect.height) return;
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
-    // center and scale
     this.mouse.x = (x - 0.5) * 2.0;
     this.mouse.y = (y - 0.5) * 2.0;
   }
@@ -210,8 +280,23 @@ export class OGLScene {
 
   start() {
     const loop = (t) => {
+      // update audio amplitude
+      if (this.micEnabled && this.analyser && this.freqData) {
+        this.analyser.getByteFrequencyData(this.freqData);
+        let sum = 0;
+        const len = Math.min(32, this.freqData.length);
+        for (let i = 0; i < len; i++) sum += this.freqData[i];
+        const avg = sum / len / 255;
+        this.audioAmp = this.audioAmp * 0.85 + avg * 0.15;
+      } else {
+        this.audioAmp *= 0.9;
+        if (this.audioAmp < 0.001) this.audioAmp = 0;
+      }
+
       this.program.uniforms.uTime.value = (t - this.timeStart) / 1000;
       this.program.uniforms.uMouse.value.set(this.mouse.x, this.mouse.y);
+      this.program.uniforms.uAudioAmp.value = prefersReduced ? 0 : this.audioAmp;
+      this.program.uniforms.uScrollPhase.value = this.scrollPhase.value;
 
       this.renderer.render({ scene: this.scene, camera: this.camera });
       this.raf = requestAnimationFrame(loop);
@@ -233,18 +318,21 @@ export class OGLScene {
     this.stop();
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('pointermove', this.onPointerMove);
-    try {
-      this.mesh?.program?.remove?.();
-      this.mesh?.remove?.();
-    } catch (e) {
-      // noop
-    }
+    window.removeEventListener('ncc:mic-enabled', this.onMicToggle);
+    try { this.source?.disconnect(); } catch {}
+    try { this.micStream?.getTracks()?.forEach((t) => t.stop()); } catch {}
+    try { this.mesh?.program?.remove?.(); this.mesh?.remove?.(); } catch (e) {}
     this.renderer = null;
     this.camera = null;
     this.scene = null;
     this.mesh = null;
     this.program = null;
     this.canvas = null;
+    this.audioCtx = null;
+    this.analyser = null;
+    this.source = null;
+    this.micStream = null;
+    this.freqData = null;
   }
 }
 

@@ -40,11 +40,55 @@ export default function Settings() {
     return base;
   }, [localAccent, localTheme]);
 
+  // skeleton/empty demo flags
+  const [loading, setLoading] = useState(true);
+  const [hasData, setHasData] = useState(true);
+
+  React.useEffect(() => {
+    const t = setTimeout(() => {
+      setLoading(false);
+      setHasData(true);
+    }, 800);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="container-page">
+        <div className="space-y-4">
+          <div className="h-8 w-64 rounded-md bg-white/10 animate-pulse" />
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="glass-panel p-5 space-y-3">
+              <div className="h-4 w-40 rounded bg-white/10 animate-pulse" />
+              <div className="h-4 w-64 rounded bg-white/10 animate-pulse" />
+              <div className="h-4 w-52 rounded bg-white/10 animate-pulse" />
+            </div>
+            <div className="glass-panel p-5 space-y-3">
+              <div className="h-4 w-40 rounded bg-white/10 animate-pulse" />
+              <div className="h-4 w-56 rounded bg-white/10 animate-pulse" />
+              <div className="h-4 w-48 rounded bg-white/10 animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasData) {
+    return (
+      <div className="container-page">
+        <div className="glass-panel p-6">
+          <div className="text-slate-300 text-sm">No settings available.</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-semibold text-slate-200">Personalization Settings</h2>
-        <div className="text-slate-400 text-sm">Avatar • Voice • Themes • Assistant personality (mock)</div>
+    <div className="container-page">
+      <div className="mb-4">
+        <h2 className="h2">Personalization Settings</h2>
+        <div className="p text-slate-400">Avatar • Voice • Themes • Assistant personality (mock)</div>
       </div>
 
       <Tabs
@@ -116,6 +160,8 @@ function ThemeTab({ theme, setTheme, accent, setAccent, antdPreviewTheme, onSave
     '--bg-dark-mid': theme === 'neon' ? '#101a35' : theme === 'glass-contrast' ? '#0f172a' : '#1e293b',
     '--bg-dark-end': theme === 'neon' ? '#0a0f1f' : theme === 'glass-contrast' ? '#0b1220' : '#0f172a',
     '--accent': accent,
+    '--accent-contrast': theme === 'neon' ? '#051018' : '#0b1220',
+    '--text-on-accent': theme === 'glass-contrast' ? '#f2e7ff' : theme === 'neon' ? '#cff9ff' : '#e6f6ff',
   };
 
   return (
@@ -137,10 +183,11 @@ function ThemeTab({ theme, setTheme, accent, setAccent, antdPreviewTheme, onSave
         <div>
           <div className="text-slate-200 mb-2">Accent Color</div>
           <Input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} />
+          <div className="text-xs text-slate-400 mt-1">High contrast text/colors auto-applied.</div>
         </div>
         <div>
-          <div className="text-slate-200 mb-2">Animations</div>
-          <Switch defaultChecked /> <span className="text-slate-400 text-sm ml-2">Enable UI Animations</span>
+          <div className="text-slate-200 mb-2">Preview Actions</div>
+          <Button type="primary" onClick={onSave}>Save Theme</Button>
         </div>
       </div>
 

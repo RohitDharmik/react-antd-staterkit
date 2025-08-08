@@ -74,9 +74,9 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: (
-      <AuthLayout>
+      <PublicLayout>
         <Login />
-      </AuthLayout>
+      </PublicLayout>
     ),
   },
   // Private app routes remain under MainLayout + PrivateRoute

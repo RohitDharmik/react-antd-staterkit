@@ -1,5 +1,6 @@
 import React from 'react';
 import Navbar from '../components/Public/Navbar';
+import MouseLight from '../components/MouseLight';
 
 /**
  * PublicLayout
@@ -10,6 +11,7 @@ const PublicLayout = ({ children, footer = true }) => {
   return (
     <div className="min-h-screen text-white relative overflow-x-hidden bg-slate-950">
       <Navbar />
+            <MouseLight />
       <main className="pt-24 pb-16">{children}</main>
       {footer && (
         <footer className="py-10 border-t border-white/10 bg-slate-950/60 backdrop-blur">

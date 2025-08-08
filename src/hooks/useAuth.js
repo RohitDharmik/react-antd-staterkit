@@ -28,39 +28,58 @@
 // export default useAuth;
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import Password from 'antd/es/input/Password';
 
+/**
+ * Simple demo auth:
+ * - Accepts only:
+ *    email: admin@gmail.com
+ *    password: admin123
+ * - Persists a token and user to localStorage
+ * - Provides logout to clear session
+ */
 const useAuth = () => {
   const { user, setUser } = useContext(AuthContext);
 
-  const login = async (credentials) => {
-    // --- DEMO MODE: Using static JSON data instead of an API call ---
-    // Simulate an API delay to mimic a real network request
-    await new Promise(resolve => setTimeout(resolve, 500)); 
+  const login = async ({ email, password, remember }) => {
+    // Simulate API latency
+    await new Promise((resolve) => setTimeout(resolve, 600));
 
-    // Define the static JSON data you want to use for the demo
+    // Basic credential check for demo
+    const validEmail = 'admin@gmail.com';
+    const validPassword = 'admin123';
+
+    if ((email?.toLowerCase?.() ?? email) !== validEmail || password !== validPassword) {
+      console.log('Invalid credentials', { email, password });
+      
+      throw new Error('Invalid credentials');
+    }
+
     const demoUser = {
-      id: 'demo123',
-      name: 'John Doe',
-      email: "admin@gmail.com", // Use the email from the credentials for a personal touch
+      id: 'demo-admin',
+      name: 'Admin',
+      email: validEmail,
       role: 'admin',
-      Password: 'password', // Use a static password for demo purposes
-      preferences: {
-        theme: 'dark',
-        notifications: true,
-      },
+      preferences: { theme: 'dark', notifications: true },
     };
-
     const demoToken = 'demo-token-123-abc';
 
-    // The rest of the logic is the same as the original API call
+    // Persist session
     localStorage.setItem('token', demoToken);
+    localStorage.setItem('user', JSON.stringify(demoUser));
+    if (remember) {
+      localStorage.setItem('remember', 'true');
+    } else {
+      localStorage.removeItem('remember');
+    }
+
     setUser(demoUser);
     return demoUser;
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('remember');
     setUser(null);
   };
 
